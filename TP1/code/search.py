@@ -101,6 +101,7 @@ def breadthFirstSearch(problem):
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 2 ICI
     '''
+    # Inspired by https://stackoverflow.com/a/25583948
     from util import Queue
     
     s = problem.getStartState() # starting state
