@@ -134,7 +134,29 @@ def uniformCostSearch(problem):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 3 ICI
     '''
 
-    util.raiseNotDefined()
+    from util import PriorityQueue
+    
+    s = problem.getStartState() # starting state
+    L = PriorityQueue() # FIFO data structure
+    L.push([(s, '', 1)], 0) # Initial state
+    V = set() # Visited states
+
+    while not L.isEmpty():
+        s = L.pop() # First element of queue
+        last_node = s[-1] # Last node of the path
+
+        if problem.isGoalState(last_node[0]): # If we reached the end state
+            return [path[1] for path in s if path[1] != ''] # Return the path to the end state
+        else:
+            C = problem.getSuccessors(last_node[0])
+            for successor in C:
+                if successor not in V: # If successor hasn't been visited yet c
+                    new_path = list(s)
+                    new_path.append(successor) # Add the successor to the new path
+                    priority_path = problem.getCostOfActions([path[1] for path in new_path if path[1] != ''])
+                    L.push(new_path, priority_path) # Add new path to the queue
+                    V.add(successor) # Mark the successor as visited       
+    return       
 
 def nullHeuristic(state, problem=None):
     """
