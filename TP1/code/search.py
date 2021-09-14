@@ -17,6 +17,7 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
+from game import Directions
 import util
 
 class SearchProblem:
@@ -67,7 +68,6 @@ def tinyMazeSearch(problem):
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
     sequence of moves will be incorrect, so only use this for tinyMaze.
     """
-    from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
@@ -101,19 +101,28 @@ def breadthFirstSearch(problem):
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 2 ICI
     '''
-    from code.util import Queue
+    from util import Queue
     
-    print("Start:", problem.getStartState())
-    # s = problem.getStartState()
-    # L = Queue()
-    # solution = []
-    # L.push(s)
-    # while not L.isEmpty():
-    #     s = L.pop()
-    #     if problem.isGoalState(s):
-    #         return solution
-        # else:
-        #     L.push(problem.)
+    s = problem.getStartState() # starting state
+    L = Queue() # FIFO data structure
+    L.push([(s, '', 1)]) # Initial state
+    V = set() # Visited states
+
+    while not L.isEmpty():
+        s = L.pop() # First element of queue
+        last_node = s[-1] # Last node of the path
+
+        if problem.isGoalState(last_node[0]): # If we reached the end state
+            return [path[1] for path in s if path[1] != ''] # Return the path to the end state
+        else:
+            C = problem.getSuccessors(last_node[0])
+            for successor in C:
+                if successor not in V: # If successor hasn't been visited yet c
+                    new_path = list(s)
+                    new_path.append(successor) # Add the successor to the new path
+                    L.push(new_path) # Add new path to the queue
+                    V.add(successor) # Mark the successor as visited       
+    return       
 
 
 def uniformCostSearch(problem):
