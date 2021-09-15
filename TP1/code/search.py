@@ -91,7 +91,7 @@ def depthFirstSearch(problem):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 1 ICI
     '''
     from util import Stack
-    visited = set()
+    visited = []
     s = problem.getStartState()
     L = Stack()
     L.push([(s, '', 1)])
@@ -107,7 +107,7 @@ def depthFirstSearch(problem):
                     new_path = list(s)
                     new_path.append(successor) # Add the successor to the new path
                     L.push(new_path) # Add new path to the queue
-                    visited.add(successor) 
+                    visited.append(successor) 
     return [] #empty list?
 
 def breadthFirstSearch(problem):
@@ -123,7 +123,7 @@ def breadthFirstSearch(problem):
     s = problem.getStartState() # starting state
     L = Queue() # FIFO data structure
     L.push([(s, '', 1)]) # Initial state
-    V = set() # Visited states
+    V = [] # Visited states
 
     while not L.isEmpty():
         s = L.pop() # First element of queue
@@ -138,7 +138,7 @@ def breadthFirstSearch(problem):
                     new_path = list(s)
                     new_path.append(successor) # Add the successor to the new path
                     L.push(new_path) # Add new path to the queue
-                    V.add(successor) # Mark the successor as visited       
+                    V.append(successor) # Mark the successor as visited       
     return       
 
 
@@ -155,7 +155,7 @@ def uniformCostSearch(problem):
     s = problem.getStartState() # starting state
     L = PriorityQueue() # FIFO data structure
     L.push([(s, '', 1)], 0) # Initial state
-    V = set() # Visited states
+    V = [] # Visited states
 
     while not L.isEmpty():
         s = L.pop() # First element of queue
@@ -171,7 +171,7 @@ def uniformCostSearch(problem):
                     new_path.append(successor) # Add the successor to the new path
                     priority_path = problem.getCostOfActions([path[1] for path in new_path if path[1] != ''])
                     L.push(new_path, priority_path) # Add new path to the queue
-                    V.add(successor) # Mark the successor as visited       
+                    V.append(successor) # Mark the successor as visited       
     return       
 
 def nullHeuristic(state, problem=None):
@@ -190,7 +190,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     s = problem.getStartState() # starting state
     L = PriorityQueue() 
     L.push([(s, '', 1)], 0)
-    V = set() # Visited states
+    V = [] # Visited states
     
     while not L.isEmpty():
         s = L.pop() # First element of queue
@@ -207,7 +207,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     estimate_cost = heuristic(last_node[0], problem)
                     combo_cost = problem.getCostOfActions([path[1] for path in new_path if path[1] != '']) + estimate_cost
                     L.push(new_path, combo_cost) # Add new path to the queue
-                    V.add(successor) # Mark the successor as visited       
+                    V.append(successor) # Mark the successor as visited       
     return  
 
 # Abbreviations
