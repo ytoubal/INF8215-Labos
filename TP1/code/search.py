@@ -90,9 +90,25 @@ def depthFirstSearch(problem):
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 1 ICI
     '''
-
-    util.raiseNotDefined()
-
+    from util import Stack
+    visited = set()
+    s = problem.getStartState()
+    L = Stack()
+    L.push([(s, '', 1)])
+    
+    while not L.isEmpty():
+        s = L.pop()
+        last_node = s[-1] 
+        if problem.isGoalState(last_node[0]): return [path[1] for path in s if path[1] != '']
+        else: 
+            C = problem.getSuccessors(last_node[0])
+            for successor in C:
+                if successor not in visited: 
+                    new_path = list(s)
+                    new_path.append(successor) # Add the successor to the new path
+                    L.push(new_path) # Add new path to the queue
+                    visited.add(successor) 
+    return [] #empty list?
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
