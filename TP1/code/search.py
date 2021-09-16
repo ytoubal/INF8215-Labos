@@ -162,7 +162,7 @@ def uniformCostSearch(problem):
                     new_path = list(s)
                     new_path.append(successor) # Add the successor to the new path
                     priority_path = problem.getCostOfActions([path[1] for path in new_path if path[1] != ''])
-                    L.push(new_path, priority_path) # Add new path to the queue
+                    L.update(new_path, priority_path) # Add new path to the queue
     return [] #empty list?       
 
 def nullHeuristic(state, problem=None):
@@ -182,7 +182,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     L = PriorityQueue() 
     L.push([(s, '', 1)], 0)
     V = [] # Visited states
-    
+
     while not L.isEmpty():
         s = L.pop()
         last_node = s[-1][0] 
@@ -198,7 +198,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     new_path.append(successor) # Add the successor to the new path
                     estimate_cost = heuristic(last_node, problem)
                     combo_cost = problem.getCostOfActions([path[1] for path in new_path if path[1] != '']) + estimate_cost
-                    L.push(new_path, combo_cost) # Add new path to the queue 
+                    L.update(new_path, combo_cost) # Add new path to the queue 
     return [] 
 
 # Abbreviations
