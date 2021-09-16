@@ -91,23 +91,26 @@ def depthFirstSearch(problem):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 1 ICI
     '''
     from util import Stack
-    visited = []
-    s = problem.getStartState()
-    L = Stack()
-    L.push([(s, '', 1)])
+
+    s = problem.getStartState() # starting state
+    L = Stack() # LIFO data structure
+    L.push([(s, '', 1)]) # Initial state
+    V = [] # Visited states
     
     while not L.isEmpty():
         s = L.pop()
-        last_node = s[-1] 
-        if problem.isGoalState(last_node[0]): return [path[1] for path in s if path[1] != '']
-        else: 
-            C = problem.getSuccessors(last_node[0])
+        last_node = s[-1][0] 
+
+        if problem.isGoalState(last_node): 
+            return [path[1] for path in s if path[1] != '']
+        elif last_node not in V: 
+            V.append(last_node)
+            C = problem.getSuccessors(last_node)
             for successor in C:
-                if successor not in visited: 
+                if successor[0] not in V: 
                     new_path = list(s)
                     new_path.append(successor) # Add the successor to the new path
-                    L.push(new_path) # Add new path to the queue
-                    visited.append(successor) 
+                    L.push(new_path) # Add new path to the stack
     return [] #empty list?
 
 def breadthFirstSearch(problem):
@@ -121,25 +124,25 @@ def breadthFirstSearch(problem):
     from util import Queue
     
     s = problem.getStartState() # starting state
-    L = Queue() # FIFO data structure
+    L = Queue() # LIFO data structure
     L.push([(s, '', 1)]) # Initial state
     V = [] # Visited states
-
+    
     while not L.isEmpty():
-        s = L.pop() # First element of queue
-        last_node = s[-1] # Last node of the path
+        s = L.pop()
+        last_node = s[-1][0] 
 
-        if problem.isGoalState(last_node[0]): # If we reached the end state
-            return [path[1] for path in s if path[1] != ''] # Return the path to the end state
-        else:
-            C = problem.getSuccessors(last_node[0])
+        if problem.isGoalState(last_node): 
+            return [path[1] for path in s if path[1] != '']
+        elif last_node not in V: 
+            V.append(last_node)
+            C = problem.getSuccessors(last_node)
             for successor in C:
-                if successor not in V: # If successor hasn't been visited yet c
+                if successor[0] not in V: 
                     new_path = list(s)
                     new_path.append(successor) # Add the successor to the new path
-                    L.push(new_path) # Add new path to the queue
-                    V.append(successor) # Mark the successor as visited       
-    return       
+                    L.push(new_path) # Add new path to the Queue
+    return [] #empty list?
 
 
 def uniformCostSearch(problem):
@@ -153,26 +156,26 @@ def uniformCostSearch(problem):
     from util import PriorityQueue
     
     s = problem.getStartState() # starting state
-    L = PriorityQueue() # FIFO data structure
+    L = PriorityQueue()
     L.push([(s, '', 1)], 0) # Initial state
     V = [] # Visited states
-
+    
     while not L.isEmpty():
-        s = L.pop() # First element of queue
-        last_node = s[-1] # Last node of the path
+        s = L.pop()
+        last_node = s[-1][0] 
 
-        if problem.isGoalState(last_node[0]): # If we reached the end state
-            return [path[1] for path in s if path[1] != ''] # Return the path to the end state
-        else:
-            C = problem.getSuccessors(last_node[0])
+        if problem.isGoalState(last_node): 
+            return [path[1] for path in s if path[1] != '']
+        elif last_node not in V: 
+            V.append(last_node)
+            C = problem.getSuccessors(last_node)
             for successor in C:
-                if successor not in V: # If successor hasn't been visited yet c
+                if successor[0] not in V: 
                     new_path = list(s)
                     new_path.append(successor) # Add the successor to the new path
                     priority_path = problem.getCostOfActions([path[1] for path in new_path if path[1] != ''])
                     L.push(new_path, priority_path) # Add new path to the queue
-                    V.append(successor) # Mark the successor as visited       
-    return       
+    return [] #empty list?       
 
 def nullHeuristic(state, problem=None):
     """
@@ -193,22 +196,22 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     V = [] # Visited states
     
     while not L.isEmpty():
-        s = L.pop() # First element of queue
-        last_node = s[-1] # Last node of the path
+        s = L.pop()
+        last_node = s[-1][0] 
 
-        if problem.isGoalState(last_node[0]): # If we reached the end state
-            return [path[1] for path in s if path[1] != ''] # Return the path to the end state
-        else:
-            C = problem.getSuccessors(last_node[0])
+        if problem.isGoalState(last_node): 
+            return [path[1] for path in s if path[1] != '']
+        elif last_node not in V: 
+            V.append(last_node)
+            C = problem.getSuccessors(last_node)
             for successor in C:
-                if successor not in V: # If successor hasn't been visited yet c
+                if successor[0] not in V: # If successor hasn't been visited yet c
                     new_path = list(s)
                     new_path.append(successor) # Add the successor to the new path
-                    estimate_cost = heuristic(last_node[0], problem)
+                    estimate_cost = heuristic(last_node, problem)
                     combo_cost = problem.getCostOfActions([path[1] for path in new_path if path[1] != '']) + estimate_cost
-                    L.push(new_path, combo_cost) # Add new path to the queue
-                    V.append(successor) # Mark the successor as visited       
-    return  
+                    L.push(new_path, combo_cost) # Add new path to the queue 
+    return [] 
 
 # Abbreviations
 bfs = breadthFirstSearch
