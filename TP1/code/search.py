@@ -196,7 +196,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 if successor[0] not in V: # If successor hasn't been visited yet c
                     new_path = list(s)
                     new_path.append(successor) # Add the successor to the new path
-                    estimate_cost = heuristic(last_node, problem)
+                    estimate_cost = heuristic(successor[0], problem)
                     combo_cost = problem.getCostOfActions([path[1] for path in new_path if path[1] != '']) + estimate_cost
                     L.update(new_path, combo_cost) # Add new path to the queue 
     return [] 
