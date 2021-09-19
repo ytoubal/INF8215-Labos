@@ -74,7 +74,6 @@ def tinyMazeSearch(problem):
 
 def searchAlgorithmWithoutPriority(problem, data_structure):
     #Shared code between BFS and DFS
-
     s = problem.getStartState() # starting state
     data_structure.push([(s, '', 1)]) # Initial state
     V = [] # Visited states

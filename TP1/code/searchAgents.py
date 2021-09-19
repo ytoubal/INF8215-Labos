@@ -372,6 +372,12 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
+def findClosest(pos, cornerList):
+    if len(cornerList) == 0: return 0
+    distanceList = [util.manhattanDistance(pos, corner) for corner in cornerList]
+    index = distanceList.index(min(distanceList))
+    return cornerList[index]
+
 def cornersHeuristic(state, problem):
     """
     A heuristic for the CornersProblem that you defined.
@@ -391,8 +397,18 @@ def cornersHeuristic(state, problem):
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 6 ICI
     '''
+    unvisited_corners = [corner for corner in corners if corner not in state[1]]
+    currentPos = state[0]
     
-    return 0
+    distance = 0
+    while unvisited_corners:
+        #find closest node
+        closestPoint = findClosest(currentPos, unvisited_corners)
+        distance += util.manhattanDistance(currentPos, closestPoint)
+        unvisited_corners.remove(closestPoint)
+        currentPos = closestPoint
+
+    return distance
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
