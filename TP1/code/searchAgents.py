@@ -353,7 +353,7 @@ class CornersProblem(search.SearchProblem):
             
             if not hitsWall:
                 #next_node = (nextx, nexty)
-                unvisited_corners = state[1][:]
+                unvisited_corners = state[1].copy()
                 #if next_node in unvisited_corners:
                     #unvisited_corners.remove(next_node)
                 state = ((nextx, nexty), unvisited_corners)
@@ -401,7 +401,7 @@ def cornersHeuristic(state, problem):
     '''
     currentPos, unvisited_corners = state
     distance = 0
-    unvisited_corners = unvisited_corners[:]
+    unvisited_corners = unvisited_corners.copy()
 
     while len(unvisited_corners) != 0:
         #find closest node
@@ -501,12 +501,22 @@ def foodHeuristic(state, problem: FoodSearchProblem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
+    currentPos, foodGrid = state
 
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 7 ICI
     '''
+    foodList = foodGrid.asList()
+    distance = 0
+    unvisited_corners = foodList.copy()
 
+    while len(unvisited_corners) != 0:
+        #find closest node
+        closest_corner = findClosest(currentPos, unvisited_corners)
+        distance += util.manhattanDistance(currentPos, closest_corner)
+        currentPos = closest_corner
+        unvisited_corners.remove(closest_corner)
+    return distance
 
     return 0
 
