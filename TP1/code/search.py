@@ -85,11 +85,11 @@ def searchAlgorithmWithoutPriority(problem, data_structure):
         if problem.isGoalState(last_node): 
             return [path[1] for path in s if path[1] != '']
         elif last_node not in V: 
-            V.append(last_node)
             C = problem.getSuccessors(last_node)
+            V.append(last_node)
             for successor in C:
                 if successor[0] not in V: 
-                    new_path = list(s)
+                    new_path = s[:]
                     new_path.append(successor) # Add the successor to the new path
                     data_structure.push(new_path) 
     return [] #empty list?
@@ -128,7 +128,7 @@ def breadthFirstSearch(problem):
     # Inspired by https://stackoverflow.com/a/25583948
     from util import Queue
     
-    L = Queue() # LIFO data structure
+    L = Queue() # FIFO data structure
     return searchAlgorithmWithoutPriority(problem, L)
 
 

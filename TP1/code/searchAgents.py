@@ -305,8 +305,7 @@ class CornersProblem(search.SearchProblem):
         '''
             INSÉREZ VOTRE SOLUTION À LA QUESTION 5 ICI
         '''
-        
-        return (self.startingPosition, [])
+        return (self.startingPosition, [corner for corner in self.corners])
 
     def isGoalState(self, state):
         """
@@ -316,11 +315,12 @@ class CornersProblem(search.SearchProblem):
         '''
             INSÉREZ VOTRE SOLUTION À LA QUESTION 5 ICI
         '''
-        current_pos, visited_corners = state
+        current_pos, unvisited_corners = state
 
-        if current_pos in self.corners and current_pos not in visited_corners:
-            visited_corners.append(current_pos)
-        return len(visited_corners) == 4
+        if current_pos in unvisited_corners:
+            unvisited_corners.remove(current_pos)
+
+        return len(unvisited_corners) == 0
 
     def getSuccessors(self, state):
         """
@@ -350,10 +350,13 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
-            visited_corners = list(state[1])
-
+            
             if not hitsWall:
-                state = ((nextx, nexty), visited_corners)
+                #next_node = (nextx, nexty)
+                unvisited_corners = state[1][:]
+                #if next_node in unvisited_corners:
+                    #unvisited_corners.remove(next_node)
+                state = ((nextx, nexty), unvisited_corners)
                 successors.append((state, action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
@@ -373,7 +376,8 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 def findClosest(pos, cornerList):
-    if len(cornerList) == 0: return 0
+    if len(cornerList) == 0:
+        return None
     distanceList = [util.manhattanDistance(pos, corner) for corner in cornerList]
     index = distanceList.index(min(distanceList))
     return cornerList[index]
@@ -397,17 +401,15 @@ def cornersHeuristic(state, problem):
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 6 ICI
     '''
-    unvisited_corners = [corner for corner in corners if corner not in state[1]]
-    currentPos = state[0]
-    
+    currentPos, unvisited_corners = state
     distance = 0
-    while unvisited_corners:
-        #find closest node
-        closestPoint = findClosest(currentPos, unvisited_corners)
-        distance += util.manhattanDistance(currentPos, closestPoint)
-        unvisited_corners.remove(closestPoint)
-        currentPos = closestPoint
 
+    while len(unvisited_corners) > 0:
+        #find closest node
+        closest_corner = findClosest(currentPos, unvisited_corners)
+        distance += util.manhattanDistance(currentPos, closest_corner)
+        currentPos = closest_corner
+        unvisited_corners.remove(closest_corner)
     return distance
 
 class AStarCornersAgent(SearchAgent):
