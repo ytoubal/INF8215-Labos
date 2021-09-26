@@ -542,6 +542,23 @@ def foodHeuristic(state, problem: FoodSearchProblem):
 
     # return distance_closest_food + max(distance_foods)
 
+    #fourth try
+    # Real/Manhattan BFS: 6333 5.0 seconds
+    # Real/Real BFS: 1712 55.2 seconds
+    # Manhattan/Real BFS: 801 22.4 seconds
+    foodList = foodGrid.asList()
+    unvisited_corners = foodList.copy()
 
+    if len(unvisited_corners) == 0:
+        return 0
 
+    closest_corner = findClosest(currentPos, unvisited_corners)
+    distance_closest_food = util.manhattanDistance(currentPos, closest_corner) 
+    #distance_closest_food = realDistance(currentPos, closest_corner, problem.startingGameState) 
+    distance_foods = [realDistance(foodPos, destinationFoodPos, problem.startingGameState) for foodPos in foodList for destinationFoodPos in foodList]
+    #distance_foods = [util.manhattanDistance(foodPos, destinationFoodPos) for foodPos in foodList for destinationFoodPos in foodList]
+    return distance_closest_food + max(distance_foods)
 
+def realDistance(start, end, gameState):
+    problem = PositionSearchProblem(gameState, start=start, goal=end, warn=False, visualize=False)
+    return problem.getCostOfActions(search.bfs(problem))
