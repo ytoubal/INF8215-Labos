@@ -506,17 +506,26 @@ def foodHeuristic(state, problem: FoodSearchProblem):
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 7 ICI
     '''
-    foodList = foodGrid.asList()
-    distance = 0
-    unvisited_corners = foodList.copy()
+    #first try
+    #not working
 
-    while len(unvisited_corners) != 0:
-        #find closest node
-        closest_corner = findClosest(currentPos, unvisited_corners)
-        distance += util.manhattanDistance(currentPos, closest_corner)
-        currentPos = closest_corner
-        unvisited_corners.remove(closest_corner)
-    return distance
+    # foodList = foodGrid.asList()
+    # distance = 0
+    # unvisited_corners = foodList.copy()
 
-    return 0
+    # while len(unvisited_corners) != 0:
+    #     #find closest node
+    #     closest_corner = findClosest(currentPos, unvisited_corners)
+    #     distance += util.manhattanDistance(currentPos, closest_corner)
+    #     currentPos = closest_corner
+    #     unvisited_corners.remove(closest_corner)
+    # return distance
+
+    #second try 
+    #9551 nodes
+
+    # foodList = foodGrid.asList()
+    # result = [util.manhattanDistance(currentPos, foodPos) for foodPos in foodList]
+    # return max(result) if len(result) != 0 else 0
+
 
