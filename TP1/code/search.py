@@ -158,7 +158,7 @@ def uniformCostSearch(problem):
             C = problem.getSuccessors(last_node)
             for successor in C:
                 if successor[0] not in V: 
-                    new_path = list(s)
+                    new_path = s[:]
                     new_path.append(successor) # Add the successor to the new path
                     priority_path = problem.getCostOfActions([path[1] for path in new_path if path[1] != ''])
                     L.update(new_path, priority_path) # Add new path to the queue
@@ -185,15 +185,14 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     while not L.isEmpty():
         s = L.pop()
         last_node = s[-1][0] 
-
-        if problem.isGoalState(last_node): 
+        if problem.isGoalState(last_node):
             return [path[1] for path in s if path[1] != '']
         elif last_node not in V: 
             V.append(last_node)
             C = problem.getSuccessors(last_node)
             for successor in C:
                 if successor[0] not in V: # If successor hasn't been visited yet c
-                    new_path = list(s)
+                    new_path = s[:]
                     new_path.append(successor) # Add the successor to the new path
                     estimate_cost = heuristic(successor[0], problem)
                     combo_cost = problem.getCostOfActions([path[1] for path in new_path if path[1] != '']) + estimate_cost

@@ -734,7 +734,6 @@ class CornerHeuristicSanity(testClasses.TestCase):
                 return False
         # cornerGoalH
         if heuristics[len(heuristics) - 1] != 0:
-            print(heuristics[len(heuristics) - 1])
             grades.addMessage('FAIL: heuristic non-zero at goal')
             return False
         grades.addMessage('PASS: heuristic value less than true cost at start state')

@@ -376,8 +376,6 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 def findClosest(pos, cornerList):
-    if len(cornerList) == 0:
-        return None
     distanceList = [util.manhattanDistance(pos, corner) for corner in cornerList]
     index = distanceList.index(min(distanceList))
     return cornerList[index]
@@ -403,8 +401,9 @@ def cornersHeuristic(state, problem):
     '''
     currentPos, unvisited_corners = state
     distance = 0
+    unvisited_corners = unvisited_corners[:]
 
-    while len(unvisited_corners) > 0:
+    while len(unvisited_corners) != 0:
         #find closest node
         closest_corner = findClosest(currentPos, unvisited_corners)
         distance += util.manhattanDistance(currentPos, closest_corner)
