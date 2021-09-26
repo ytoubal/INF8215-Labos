@@ -315,10 +315,7 @@ class CornersProblem(search.SearchProblem):
         '''
             INSÉREZ VOTRE SOLUTION À LA QUESTION 5 ICI
         '''
-        current_pos, unvisited_corners = state
-
-        if current_pos in unvisited_corners:
-            unvisited_corners.remove(current_pos)
+        _ , unvisited_corners = state
 
         return len(unvisited_corners) == 0
 
@@ -352,12 +349,12 @@ class CornersProblem(search.SearchProblem):
             hitsWall = self.walls[nextx][nexty]
             
             if not hitsWall:
-                #next_node = (nextx, nexty)
+                next_node = (nextx, nexty)
                 unvisited_corners = state[1].copy()
-                #if next_node in unvisited_corners:
-                    #unvisited_corners.remove(next_node)
-                state = ((nextx, nexty), unvisited_corners)
-                successors.append((state, action, 1))
+                if next_node in unvisited_corners:
+                    unvisited_corners.remove(next_node)
+                new_state = ((nextx, nexty), unvisited_corners)
+                successors.append((new_state, action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -553,10 +550,10 @@ def foodHeuristic(state, problem: FoodSearchProblem):
         return 0
 
     closest_corner = findClosest(currentPos, unvisited_corners)
-    distance_closest_food = util.manhattanDistance(currentPos, closest_corner) 
-    #distance_closest_food = realDistance(currentPos, closest_corner, problem.startingGameState) 
-    distance_foods = [realDistance(foodPos, destinationFoodPos, problem.startingGameState) for foodPos in foodList for destinationFoodPos in foodList]
-    #distance_foods = [util.manhattanDistance(foodPos, destinationFoodPos) for foodPos in foodList for destinationFoodPos in foodList]
+    #distance_closest_food = util.manhattanDistance(currentPos, closest_corner) 
+    distance_closest_food = realDistance(currentPos, closest_corner, problem.startingGameState) 
+    #distance_foods = [realDistance(foodPos, destinationFoodPos, problem.startingGameState) for foodPos in foodList for destinationFoodPos in foodList]
+    distance_foods = [util.manhattanDistance(foodPos, destinationFoodPos) for foodPos in foodList for destinationFoodPos in foodList]
     return distance_closest_food + max(distance_foods)
 
 def realDistance(start, end, gameState):
