@@ -72,27 +72,28 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def searchAlgorithmWithoutPriority(problem, data_structure):
+# Inspired by https://stackoverflow.com/a/25583948
+def searchAlgorithmWithoutPriority(problem, pathList):
     #Shared code between BFS and DFS
-    s = problem.getStartState() # starting state
-    data_structure.push([(s, '', 1)]) # Initial state
-    V = [] # Visited states
+    state = problem.getStartState() # starting state
+    pathList.push([(state, '', 1)])
+    visitedStates = []
     
-    while not data_structure.isEmpty():
-        s = data_structure.pop()
-        last_node = s[-1][0] 
+    while not pathList.isEmpty():
+        state = pathList.pop()
+        lastNode = state[-1][0] 
 
-        if problem.isGoalState(last_node): 
-            return [path[1] for path in s if path[1] != '']
-        elif last_node not in V: 
-            C = problem.getSuccessors(last_node)
-            V.append(last_node)
-            for successor in C:
-                if successor[0] not in V: 
-                    new_path = s[:]
-                    new_path.append(successor) # Add the successor to the new path
-                    data_structure.push(new_path) 
-    return [] #empty list?
+        if problem.isGoalState(lastNode): 
+            return [path[1] for path in state if path[1] != '']
+        elif lastNode not in visitedStates: 
+            successorList = problem.getSuccessors(lastNode)
+            visitedStates.append(lastNode)
+            for successor in successorList:
+                if successor[0] not in visitedStates: 
+                    newPath = state[:]
+                    newPath.append(successor)
+                    pathList.push(newPath) 
+    return []
 
 def depthFirstSearch(problem):
     """
@@ -113,9 +114,8 @@ def depthFirstSearch(problem):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 1 ICI
     '''
     from util import Stack
-
-    L = Stack() # LIFO data structure
-    return searchAlgorithmWithoutPriority(problem, L)
+    # LIFO data structure
+    return searchAlgorithmWithoutPriority(problem, Stack())
     
 
 def breadthFirstSearch(problem):
@@ -125,11 +125,9 @@ def breadthFirstSearch(problem):
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 2 ICI
     '''
-    # Inspired by https://stackoverflow.com/a/25583948
     from util import Queue
-    
-    L = Queue() # FIFO data structure
-    return searchAlgorithmWithoutPriority(problem, L)
+    # FIFO data structure
+    return searchAlgorithmWithoutPriority(problem, Queue())
 
 
 def uniformCostSearch(problem):
@@ -142,27 +140,27 @@ def uniformCostSearch(problem):
 
     from util import PriorityQueue
     
-    s = problem.getStartState() # starting state
-    L = PriorityQueue()
-    L.push([(s, '', 1)], 0) # Initial state
-    V = [] # Visited states
+    state = problem.getStartState() # starting state
+    pathList = PriorityQueue()
+    pathList.push([(state, '', 1)], 0)
+    visitedStates = []
     
-    while not L.isEmpty():
-        s = L.pop()
-        last_node = s[-1][0] 
+    while not pathList.isEmpty():
+        state = pathList.pop()
+        lastNode = state[-1][0] 
 
-        if problem.isGoalState(last_node): 
-            return [path[1] for path in s if path[1] != '']
-        elif last_node not in V: 
-            V.append(last_node)
-            C = problem.getSuccessors(last_node)
-            for successor in C:
-                if successor[0] not in V: 
-                    new_path = s[:]
-                    new_path.append(successor) # Add the successor to the new path
-                    priority_path = problem.getCostOfActions([path[1] for path in new_path if path[1] != ''])
-                    L.update(new_path, priority_path) # Add new path to the queue
-    return [] #empty list?       
+        if problem.isGoalState(lastNode): 
+            return [path[1] for path in state if path[1] != '']
+        elif lastNode not in visitedStates: 
+            visitedStates.append(lastNode)
+            successorList = problem.getSuccessors(lastNode)
+            for successor in successorList:
+                if successor[0] not in visitedStates: 
+                    newPath = state[:]
+                    newPath.append(successor)
+                    priorityPath = problem.getCostOfActions([path[1] for path in newPath if path[1] != ''])
+                    pathList.update(newPath, priorityPath) # Add new path to the list
+    return []      
 
 def nullHeuristic(state, problem=None):
     """
@@ -177,26 +175,25 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 4 ICI
     '''
     from util import PriorityQueue
-    s = problem.getStartState() # starting state
-    L = PriorityQueue() 
-    L.push([(s, '', 1)], 0)
-    V = [] # Visited states
+    state = problem.getStartState() # starting state
+    pathList = PriorityQueue() 
+    pathList.push([(state, '', 1)], 0)
+    visitedStates = []
 
-    while not L.isEmpty():
-        s = L.pop()
-        last_node = s[-1][0] 
-        if problem.isGoalState(last_node):
-            return [path[1] for path in s if path[1] != '']
-        elif last_node not in V: 
-            V.append(last_node)
-            C = problem.getSuccessors(last_node)
-            for successor in C:
-                if successor[0] not in V: # If successor hasn't been visited yet c
-                    new_path = s[:]
-                    new_path.append(successor) # Add the successor to the new path
-                    estimate_cost = heuristic(successor[0], problem)
-                    combo_cost = problem.getCostOfActions([path[1] for path in new_path if path[1] != '']) + estimate_cost
-                    L.update(new_path, combo_cost) # Add new path to the queue 
+    while not pathList.isEmpty():
+        state = pathList.pop()
+        lastNode = state[-1][0] 
+        if problem.isGoalState(lastNode):
+            return [path[1] for path in state if path[1] != '']
+        elif lastNode not in visitedStates: 
+            visitedStates.append(lastNode)
+            successorList = problem.getSuccessors(lastNode)
+            for successor in successorList:
+                if successor[0] not in visitedStates: 
+                    newPath = state[:]
+                    newPath.append(successor)
+                    priorityCost = problem.getCostOfActions([path[1] for path in newPath if path[1] != '']) + heuristic(successor[0], problem)
+                    pathList.update(newPath, priorityCost) # Add new path to the list 
     return [] 
 
 # Abbreviations
