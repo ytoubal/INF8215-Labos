@@ -17,8 +17,68 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 """
 
+import math
 from quoridor import *
 
+def cutoff_depth(d):
+    """A cutoff function that searches to depth d."""
+    #TODO ameliorer
+    return lambda game, state, depth: depth > d
+
+def heuristic():
+    #TODO ameliorer
+    return lambda game , state, player: 0
+
+def h_alphabeta_search(game: Board, player, cutoff=cutoff_depth(1), heuristic=heuristic()):
+
+        def max_value(state: Board, alpha, beta, depth):
+            print("max")
+            if cutoff(game, state, depth):
+                print("cutoff")
+                return heuristic(game,state, player), None
+
+            if state.is_finished():
+                return state.get_score(player), None
+
+            v_star = -math.inf
+            m_star = None
+            for action in state.get_actions(player):
+                clone = state.clone()
+                clone.play_action(action, player)
+                next_state = clone
+                v,_ = min_value(next_state, alpha, beta, depth+1)
+                if v > v_star:
+                    v_star = v
+                    m_star = action
+                    alpha = max(alpha, v_star)
+                if v >= beta: return v_star,m_star
+            return v_star,m_star
+
+        def min_value(state: Board, alpha, beta, depth):
+            # TODO: include a recursive call to max_value function
+            print("min")
+            if cutoff(game, state, depth):
+                print("cutoff")
+                return heuristic(game,state, player), None
+
+            if state.is_finished():
+                return state.get_score(player), None
+
+            v_star = math.inf
+            m_star = None
+            for action in state.get_actions(player):
+                clone = state.clone()
+                clone.play_action(action, player)
+                next_state = clone
+                v,_ = max_value(next_state, alpha, beta, depth+1)
+                if v < v_star:
+                    v_star = v
+                    m_star = action
+                    beta = min(beta, v_star)
+                if v <= alpha: return v_star,m_star
+            return v_star,m_star
+
+        return max_value(game, -math.inf, +math.inf, 0)
 
 class MyAgent(Agent):
 
@@ -42,13 +102,23 @@ class MyAgent(Agent):
           for more details, see `Board.get_actions()` in quoridor.py
         """
         print("percept:", percepts)
-        print("player:", player)
-        print("step:", step)
+        #print("player:", player)
+        #print("step:", step)
         print("time left:", time_left if time_left else '+inf')
 
         # TODO: implement your agent and return an action for the current step.
-        pass
-
+        
+        board = dict_to_board(percepts)
+        #hardcode start
+        if step < 7 and 18 <= board.nb_walls[0]+board.nb_walls[1] <= 20 :
+            (x, y) = board.get_shortest_path(player)[0]
+            return ('P', x, y)
+        #alpha beta
+        else :
+            value, action = h_alphabeta_search(board, player)
+            print(value, action)
+        return action
+    
 
 if __name__ == "__main__":
     agent_main(MyAgent())
