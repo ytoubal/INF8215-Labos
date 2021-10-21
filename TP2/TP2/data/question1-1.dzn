@@ -1,0 +1,9 @@
+r = 2;
+c = 3;
+rowinsects = [9,12];
+colinsects = [9, 7, 5];
+knownpositions = array2d(1..r, 1..c, 
+   [
+     0, 0, 3,
+     0, 6, 0
+   ]);
