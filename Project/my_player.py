@@ -18,23 +18,35 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 """
 
 import math
+import time
 from quoridor import *
 
 def cutoff_depth(d):
     """A cutoff function that searches to depth d."""
     #TODO ameliorer
-    return lambda game, state, depth: depth > d
+    def cutoff(game, state, depth, start_time):
+        current_time = time.time()
+        #20 seconds to search
+        if current_time - start_time >= 5:
+            print("time limit > 5s: ", current_time - start_time)
+            return True
+        return depth > d
+    
+    return cutoff
 
 def heuristic():
     #TODO ameliorer
-    return lambda game , state, player: 0
+    def estimate_score(game:Board , state: Board, player):
+        
+        return state.get_score(player)
+    
+    return estimate_score
 
-def h_alphabeta_search(game: Board, player, cutoff=cutoff_depth(1), heuristic=heuristic()):
+def h_alphabeta_search(game: Board, player, cutoff=cutoff_depth(50), heuristic=heuristic()):
+        start = time.time()
 
         def max_value(state: Board, alpha, beta, depth):
-            print("max")
-            if cutoff(game, state, depth):
-                print("cutoff")
+            if cutoff(game, state, depth, start):
                 return heuristic(game,state, player), None
 
             if state.is_finished():
@@ -56,9 +68,7 @@ def h_alphabeta_search(game: Board, player, cutoff=cutoff_depth(1), heuristic=he
 
         def min_value(state: Board, alpha, beta, depth):
             # TODO: include a recursive call to max_value function
-            print("min")
-            if cutoff(game, state, depth):
-                print("cutoff")
+            if cutoff(game, state, depth, start):
                 return heuristic(game,state, player), None
 
             if state.is_finished():
@@ -115,8 +125,12 @@ class MyAgent(Agent):
             return ('P', x, y)
         #alpha beta
         else :
-            value, action = h_alphabeta_search(board, player)
-            print(value, action)
+            if time_left >= 30:
+                value, action = h_alphabeta_search(board, player)
+                print(value, action)
+            else:
+                (x, y) = board.get_shortest_path(player)[0]
+                action = ('P', x, y)
         return action
     
 
