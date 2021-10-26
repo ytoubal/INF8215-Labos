@@ -1,0 +1,22 @@
+{
+    "openFiles": [
+        "question1.mzn",
+        "question2.mzn",
+        "question3.mzn",
+        "question4.mzn",
+        "question1.mzn",
+        "question2.mzn",
+        "question3.mzn",
+        "question4.mzn"
+    ],
+    "openTab": 3,
+    "projectFiles": [
+        "question1.mzn",
+        "question2.mzn",
+        "question3.mzn",
+        "question4.mzn"
+    ],
+    "selectedBuiltinConfigId": "org.gecode.gecode",
+    "selectedBuiltinConfigVersion": "6.3.0",
+    "version": 106
+}
