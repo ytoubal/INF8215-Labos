@@ -16,18 +16,41 @@ array[1..n] of int: cols;
 array[1..n,1..n] of var 0..P: x;
 
 % 0. fix the lamps
-constraint forall(i,j in 1..n)(x[i,j] == garden[i,j]);
+constraint forall(i,j in 1..n)(if garden[i,j] == L then x[i,j] = garden[i,j] endif);
 
 % 1. fix number of plants in each row and col
-constraint forall(i in 1..n)(sum(row(x, i))=rows[i]); 
-constraint forall(j in 1..n)(sum(col(x, j))=cols[j]); 
+constraint forall(i in 1..n)(count(row(x,i), P, rows[i]));
+constraint forall(j in 1..n)(count(col(x,j), P, cols[j]));
 
 % 2. plants cant touch horizontally, vertically and diagonally
-
+constraint forall(i,j in 1 ..n where x[i,j] = P) (
+                  if i+1 <= n then x[i+1,j] != P endif /\
+                  if j+1 <= n then x[i,j+1] != P endif /\
+                  if i-1 >= 1 then x[i-1,j] != P endif /\
+                  if j-1 >= 1 then x[i,j-1] != P endif /\
+                  if i+1 <= n /\ j+1 <= n then x[i+1,j+1] != P endif /\
+                  if i+1 <= n /\ j-1 >= 1 then x[i+1,j-1] != P endif /\
+                  if i-1 >= 1 /\ j-1 >= 1 then x[i-1,j-1] != P endif /\
+                  if i-1 >= 1 /\ j+1 <= n then x[i-1,j+1] != P endif 
+);
 
 % 3. plants must be beside a lamp horizontally or vertically
+constraint forall(i,j in 1 ..n where x[i,j] = P) (
+                  if i+1 <= n then x[i+1,j] == L else false endif \/
+                  if j+1 <= n then x[i,j+1] == L else false endif \/
+                  if i-1 >= 1 then x[i-1,j] == L else false endif \/
+                  if j-1 >= 1 then x[i,j-1] == L else false endif 
+);
 
 % 4. lamps must be beside at least one plant horizontally or vertically
+constraint forall(i,j in 1 ..n where x[i,j] = L) (
+                  if i+1 <= n then x[i+1,j] == P else false endif \/
+                  if j+1 <= n then x[i,j+1] == P else false endif \/
+                  if i-1 >= 1 then x[i-1,j] == P else false endif \/
+                  if j-1 >= 1 then x[i,j-1] == P else false endif 
+);
+
+solve satisfy;
 
 output 
 [
