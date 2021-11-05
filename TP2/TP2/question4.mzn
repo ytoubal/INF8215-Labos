@@ -21,19 +21,48 @@ array[1..n_nurse,1..n_day,1..n_work_period] of var 0..1: x; % work period [MATIN
 var int: sum_preference;
 
 %Constraints
+%
 
 % 3. Respect the required minimum number of nurses
 constraint forall(j in 1..n_day, k in 1..n_work_period) (sum(n in 1..n_nurse)(x[n,j,k]) >= demande_min[j,k]);
 
-% 4.
+% 4. Restrict to only 1 period of work per day
 constraint forall(i in 1..n_nurse, j in 1..n_day) (
                   sum(w in 1..n_work_period)(x[i,j,w]) == 0 \/
                   sum(w in 1..n_work_period)(x[i,j,w]) == 1
 );
 
-% 5. 
-constraint forall(k in 1..n_work_period) (
-                  sum(n in 1..n_nurse, d in 1..n_day)(x[n,d,k]) * 6 <= 36
+% 5. Limit weekly hours to 36h
+constraint forall(i in 1..n_nurse, k in 1..n_work_period where k != REPOS) (
+                  sum(d in 1..n_day)(x[i,d,k]) * dur_work_period <= 36
+);
+
+% 6. Request at least 4 days of work per week
+constraint forall(i in 1..n_nurse) (
+                  sum(d in 1..n_day, k in 1..n_work_period where k != REPOS)(x[i,d,k]) >= 4
+);
+
+% 7. Give nurses a break after a night shift
+constraint forall(i in 1..n_nurse, j in 1..n_day where x[i,j, NUIT] = 1) (
+               if j+1 <= n_day 
+                   then forall (k in 1..n_work_period where k != REPOS) (x[i,j+1,k] = 0) /\ 
+                   x[i,j+1,n_work_period] = 1 
+               endif
+);
+
+% 8. Forbid isolated working days
+constraint forall(i in 1..n_nurse, j in 1..n_day, k in 1..n_work_period where x[i,j, REPOS] = 1) (
+               if j+1 <= n_day /\ j+2 <= n_day then 
+                   if x[i, j+1, REPOS] == 0 then x[i, j+2, REPOS] != 1 
+                   endif 
+               endif
+);
+
+% 9 Forbid nurses in working more than 3 consecutive days
+constraint forall(i in 1..n_nurse, j in 1..n_day-3) (
+               if x[i,j,REPOS] == 0 /\ x[i,j+1,REPOS] == 0 /\ x[i,j+2,REPOS] == 0
+                   then (x[i,j+3,REPOS] = 1)
+               endif
 );
 
 
