@@ -20,7 +20,21 @@ array[1..n_nurse,1..n_day,1..n_work_period] of int: preference; % Work preferenc
 array[1..n_nurse,1..n_day,1..n_work_period] of var 0..1: x; % work period [MATIN, SOIREE, NUIT, REPOS]
 var int: sum_preference;
 
+%Constraints
 
+% 3. Respect the required minimum number of nurses
+constraint forall(j in 1..n_day, k in 1..n_work_period) (sum(n in 1..n_nurse)(x[n,j,k]) >= demande_min[j,k]);
+
+% 4.
+constraint forall(i in 1..n_nurse, j in 1..n_day) (
+                  sum(w in 1..n_work_period)(x[i,j,w]) == 0 \/
+                  sum(w in 1..n_work_period)(x[i,j,w]) == 1
+);
+
+% 5. 
+constraint forall(k in 1..n_work_period) (
+                  sum(n in 1..n_nurse, d in 1..n_day)(x[n,d,k]) * 6 <= 36
+);
 
 
 output

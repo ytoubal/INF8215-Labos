@@ -4,13 +4,13 @@ n_day = n_week * 7;
 n_work_period = 4;
 dur_work_period = 6;
 
-demande_min = array2d(1..n_day,1..n_work_period,[3,  	2,	2,	0,
-                                                 1,  	2,	2,	0,
-                                                 2,  	2,	1,	0,
-                                                 2,	  2,	1,	0,
-                                                 2,  	2,	2,	0,
-                                                 2,	  2,	2,	0,
-                                                 3,  	2,	1,	0]);
+demande_min = array2d(1..n_day,1..n_work_period,[3,  2,	2,	0,
+                                                 1,  2,	2,	0,
+                                                 2,  2,	1,	0,
+                                                 2,  2,	1,	0,
+                                                 2,  2,	2,	0,
+                                                 2,  2,	2,	0,
+                                                 3,  2,	1,	0]);
                                  
 preference = array3d(1..n_nurse,1..n_day,1..n_work_period,[
 % Employee 1
