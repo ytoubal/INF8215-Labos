@@ -65,6 +65,10 @@ constraint forall(i in 1..n_nurse, j in 1..n_day-3) (
                endif
 );
 
+% Calculate preference
+sum_preference = sum(i in 1..n_nurse, j in i..n_day, k in 1..n_work_period where x[i,j,k]=1)(preference[i,j,k]);
+
+solve maximize sum_preference;
 
 output
 [
