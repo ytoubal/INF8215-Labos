@@ -28,7 +28,6 @@ constraint forall(j in 1..n_day, k in 1..n_work_period) (sum(n in 1..n_nurse)(x[
 
 % 4. Restrict to only 1 period of work per day
 constraint forall(i in 1..n_nurse, j in 1..n_day) (
-                  sum(w in 1..n_work_period)(x[i,j,w]) == 0 \/
                   sum(w in 1..n_work_period)(x[i,j,w]) == 1
 );
 
