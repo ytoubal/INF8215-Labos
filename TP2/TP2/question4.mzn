@@ -24,7 +24,7 @@ var int: sum_preference;
 %
 
 % 3. Respect the required minimum number of nurses
-constraint forall(j in 1..n_day, k in 1..n_work_period) (sum(n in 1..n_nurse)(x[n,j,k]) >= demande_min[j,k]);
+constraint forall(j in 1..n_day, k in 1..n_work_period where k != REPOS) (sum(n in 1..n_nurse)(x[n,j,k]) >= demande_min[j,k]);
 
 % 4. Restrict to only 1 period of work per day
 constraint forall(i in 1..n_nurse, j in 1..n_day) (
@@ -33,7 +33,7 @@ constraint forall(i in 1..n_nurse, j in 1..n_day) (
 
 % 5. Limit weekly hours to 36h
 constraint forall(i in 1..n_nurse, k in 1..n_work_period where k != REPOS) (
-                  sum(d in 1..n_day)(x[i,d,k]) * dur_work_period <= 36
+                  sum(d in 1..n_day)(x[i,d,k]) * dur_work_period <= 36*n_week
 );
 
 % 6. Request at least 4 days of work per week
@@ -64,8 +64,9 @@ constraint forall(i in 1..n_nurse, j in 1..n_day-3) (
                endif
 );
 
+
 % Calculate preference
-sum_preference = sum(i in 1..n_nurse, j in i..n_day, k in 1..n_work_period where x[i,j,k]=1)(preference[i,j,k]);
+sum_preference = sum(i in 1..n_nurse, j in 1..n_day, k in 1..n_work_period)(x[i,j,k]*preference[i,j,k]);
 
 solve maximize sum_preference;
 
