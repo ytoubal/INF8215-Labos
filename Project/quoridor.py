@@ -421,16 +421,26 @@ class Board:
 
     def get_score(self, player=PLAYER1):
         """Return a score for this board for the given player.
-
         The score is the difference between the lengths of the shortest path
-        of the player minus the one of its opponent. It also takes into
-        account the remaining number of walls.
-
+        of its opponent minus the one of the player.
         """
-        score = self.min_steps_before_victory((player + 1) % 2) - \
-                self.min_steps_before_victory(player)
-        if not score:
-            score = self.nb_walls[player] - self.nb_walls[(player + 1) % 2]
+        try:
+            score = self.min_steps_before_victory((player + 1) % 2) - \
+                    self.min_steps_before_victory(player)
+        except NoPath:
+            # if there is a no path for one of the players,
+            # simply count the y-distance to the goal
+            my_goal_y = self.goals[player]
+            my_y, my_x = self.pawns[player]
+            my_distance = abs(my_goal_y - my_y)
+
+            oppo_goal_y = self.goals[(player + 1) % 2]
+            oppo_y, oppo_x = self.pawns[(player + 1) % 2]
+            oppo_distance = abs(oppo_goal_y - oppo_y)
+
+            score = oppo_distance - my_distance
+
+        # score = self.nb_walls[player] - self.nb_walls[(player + 1) % 2]
         return score
 
 
