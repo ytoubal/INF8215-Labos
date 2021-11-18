@@ -21,39 +21,83 @@ import math
 import time
 from quoridor import *
 
-def cutoff_depth(d):
-    """A cutoff function that searches to depth d."""
-    #TODO ameliorer
-    def cutoff(game, state, depth, start_time, time_left):
-        current_time = time.time()
-        #20 seconds to search
-        if current_time - start_time >= 5:
-            print("time limit > 5s: ", current_time - start_time)
-            return True
-        #We consider a lower depth (2) if the time_left is lower than 2 minutes
-        #Or if we are at the very begining of the game.
-        if time_left < 120:
-            return depth >= 2 
-        return depth > d
+
+class MyAgent(Agent):
+
+    """My Quoridor agent."""
+
+    def play(self, percepts, player, step, time_left):
+        """
+        This function is used to play a move according
+        to the percepts, player and time left provided as input.
+        It must return an action representing the move the player
+        will perform.
+        :param percepts: dictionary representing the current board
+            in a form that can be fed to `dict_to_board()` in quoridor.py.
+        :param player: the player to control in this step (0 or 1)
+        :param step: the current step number, starting from 1
+        :param time_left: a float giving the number of seconds left from the time
+            credit. If the game is not time-limited, time_left is None.
+        :return: an action
+          eg: ('P', 5, 2) to move your pawn to cell (5,2)
+          eg: ('WH', 5, 2) to put a horizontal wall on corridor (5,2)
+          for more details, see `Board.get_actions()` in quoridor.py
+        """
+        print("percept:", percepts)
+        #print("player:", player)
+        #print("step:", step)
+        print("time left:", time_left if time_left else '+inf')
+
+        # TODO: implement your agent and return an action for the current step.
+        
+        board = dict_to_board(percepts)
+        #hardcode start
+        if step < 7 and 18 <= board.nb_walls[0]+board.nb_walls[1] <= 20 :
+            (x, y) = board.get_shortest_path(player)[0]
+            return ('P', x, y)
+        #alpha beta
+        else :
+            if time_left >= 30:
+                value, action = h_alphabeta_search(board, player, time_left)
+                print(value, action)
+            else:
+                (x, y) = board.get_shortest_path(player)[0]
+                action = ('P', x, y)
+        return action
     
-    return cutoff
+    def cutoff_depth(d):
+        """A cutoff function that searches to depth d."""
+        #TODO ameliorer
+        def cutoff(game, state, depth, start_time, time_left):
+            current_time = time.time()
+            #20 seconds to search
+            if current_time - start_time >= 5:
+                print("time limit > 5s: ", current_time - start_time)
+                return True
+            #We consider a lower depth (2) if the time_left is lower than 2 minutes
+            #Or if we are at the very begining of the game.
+            if time_left < 120:
+                return depth >= 2 
+            return depth > d
+        
+        return cutoff
 
-def heuristic():
-    #TODO ameliorer
+    def heuristic():
+        #TODO ameliorer
 
-    def estimate_score(game:Board , state: Board, player):
-        #Here we can see why we put "sp" in the state (which contains the two shortest path)
-        #It allows us to not call board.get_shortest_path(P) in the evaluation function.
-        #And it's better because we need the same paths sooner in the code (see successor)
-        # minSteps = len(state.get_shortest_path(player))
-        # minStepsOpponent = len(state.get_shortest_path((player+1)%2))
-        # diffMinSteps =  minStepsOpponent - minSteps
-        # maxPath = 30
-        return state.get_score(player)
+        def estimate_score(game:Board , state: Board, player):
+            #Here we can see why we put "sp" in the state (which contains the two shortest path)
+            #It allows us to not call board.get_shortest_path(P) in the evaluation function.
+            #And it's better because we need the same paths sooner in the code (see successor)
+            # minSteps = len(state.get_shortest_path(player))
+            # minStepsOpponent = len(state.get_shortest_path((player+1)%2))
+            # diffMinSteps =  minStepsOpponent - minSteps
+            # maxPath = 30
+            return state.get_score(player)
     
-    return estimate_score
+        return estimate_score
 
-def h_alphabeta_search(game: Board, player, time_left, cutoff=cutoff_depth(50), heuristic=heuristic()):
+    def h_alphabeta_search(game: Board, player, time_left, cutoff=cutoff_depth(50), heuristic=heuristic()):
         start = time.time()
 
         def max_value(state: Board, alpha, beta, depth):
@@ -100,50 +144,6 @@ def h_alphabeta_search(game: Board, player, time_left, cutoff=cutoff_depth(50), 
             return v_star,m_star
 
         return max_value(game, -math.inf, +math.inf, 0)
-
-class MyAgent(Agent):
-
-    """My Quoridor agent."""
-
-    def play(self, percepts, player, step, time_left):
-        """
-        This function is used to play a move according
-        to the percepts, player and time left provided as input.
-        It must return an action representing the move the player
-        will perform.
-        :param percepts: dictionary representing the current board
-            in a form that can be fed to `dict_to_board()` in quoridor.py.
-        :param player: the player to control in this step (0 or 1)
-        :param step: the current step number, starting from 1
-        :param time_left: a float giving the number of seconds left from the time
-            credit. If the game is not time-limited, time_left is None.
-        :return: an action
-          eg: ('P', 5, 2) to move your pawn to cell (5,2)
-          eg: ('WH', 5, 2) to put a horizontal wall on corridor (5,2)
-          for more details, see `Board.get_actions()` in quoridor.py
-        """
-        print("percept:", percepts)
-        #print("player:", player)
-        #print("step:", step)
-        print("time left:", time_left if time_left else '+inf')
-
-        # TODO: implement your agent and return an action for the current step.
-        
-        board = dict_to_board(percepts)
-        #hardcode start
-        if step < 7 and 18 <= board.nb_walls[0]+board.nb_walls[1] <= 20 :
-            (x, y) = board.get_shortest_path(player)[0]
-            return ('P', x, y)
-        #alpha beta
-        else :
-            if time_left >= 30:
-                value, action = h_alphabeta_search(board, player, time_left)
-                print(value, action)
-            else:
-                (x, y) = board.get_shortest_path(player)[0]
-                action = ('P', x, y)
-        return action
-    
 
 if __name__ == "__main__":
     agent_main(MyAgent())
