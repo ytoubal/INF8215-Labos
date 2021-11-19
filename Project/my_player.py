@@ -54,7 +54,10 @@ class MyAgent(Agent):
         board = dict_to_board(percepts)
         #hardcode start
         if step < 7 and board.nb_walls[0]+board.nb_walls[1] == 20 :
-            (x, y) = board.get_shortest_path(player)[0]
+            try:
+                (x, y) = board.get_shortest_path(player)[0]
+            except NoPath:
+                print("NO PATH 1 play()")
             return ('P', x, y)
         #alpha beta
         else :
@@ -62,7 +65,10 @@ class MyAgent(Agent):
                 value, action = self.h_alphabeta_search(board, player, step,time_left)
                 #print(value, action)
             else:
-                (x, y) = board.get_shortest_path(player)[0]
+                try:
+                    (x, y) = board.get_shortest_path(player)[0]
+                except NoPath:
+                    print("NO PATH 1 play()")
                 action = ('P', x, y)
         return action
     
@@ -77,8 +83,8 @@ class MyAgent(Agent):
                 return True
             #We consider a lower depth (2) if the time_left is lower than 2 minutes
             #Or if we are at the very begining of the game.
-            if step < 7 or time_left < 120:
-                return depth >= 2
+            if step < 7 or time_left < 90:
+                return depth >= 3
             return depth > d
         
         return cutoff
@@ -94,25 +100,33 @@ class MyAgent(Agent):
             # minStepsOpponent = len(state.get_shortest_path((player+1)%2))
             # diffMinSteps =  minStepsOpponent - minSteps
             # maxPath = 30
-            return state.get_score(player)
+            try:
+                return state.get_score(player)
+            except NoPath:
+                print("NO PATH heuristic")
     
         return estimate_score
 
     def get_actions():
 
         def filter_wall_moves(wall_moves, state: Board, other_player):
-            best_wall_moves = []
-            #best_wall_moves = wall_moves
-            position_opponent = state.pawns[other_player]
-            #print("START", len(wall_moves))
-            for wall_move in wall_moves:
-                (_, x, y) = wall_move
-                #walls close to opponent
-                position_from_opponent = utils.manhattan([x,y], position_opponent)
-                if position_from_opponent <= 3:
-                    best_wall_moves.append(wall_move)
-            #print("END", len(best_wall_moves))
-            return best_wall_moves
+            
+            if state.nb_walls[0] + state.nb_walls[1] <= 10:
+                return wall_moves
+            else:
+                best_wall_moves = []
+                #best_wall_moves = wall_moves
+                position_opponent = state.pawns[other_player]
+                #print("START", len(wall_moves))
+
+                for wall_move in wall_moves:
+                    (_, x, y) = wall_move
+                    #walls close to opponent
+                    position_from_opponent = utils.manhattan([x,y], position_opponent)
+                    if position_from_opponent <= 1:
+                        best_wall_moves.append(wall_move)
+                #print("END", len(best_wall_moves))
+                return best_wall_moves
 
         def filter_actions(state: Board, player):
             #all_actions = state.get_actions(player)
@@ -138,6 +152,7 @@ class MyAgent(Agent):
             #print("WALL", adv_steps_victory)
             #print("STATE PLAYER")
             #print(state, player)
+            #print(actions_to_explore)
             return actions_to_explore 
 
         return filter_actions
