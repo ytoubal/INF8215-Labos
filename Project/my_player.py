@@ -54,15 +54,27 @@ class MyAgent(Agent):
         board = dict_to_board(percepts)
         #hardcode start
         if step < 7 and board.nb_walls[0]+board.nb_walls[1] == 20 :
-            (x, y) = board.get_shortest_path(player)[0]
+            try:
+                (x, y) = board.get_shortest_path(player)[0]
+            except NoPath:
+                print("NO PATH 1 play()")
+            return ('P', x, y)
+        elif step < 5 and board.nb_walls[0]+board.nb_walls[1] < 20:
+            try:
+                (x, y) = board.get_shortest_path(player)[0]
+            except NoPath:
+                print("NO PATH 1 play()")
             return ('P', x, y)
         #alpha beta
         else :
-            if time_left >= 30:
+            if time_left >= 45 and board.nb_walls[player] > 0:
                 value, action = self.h_alphabeta_search(board, player, step,time_left)
-                #print(value, action)
+                print(value, action)
             else:
-                (x, y) = board.get_shortest_path(player)[0]
+                try:
+                    (x, y) = board.get_shortest_path(player)[0]
+                except NoPath:
+                    print("NO PATH 2 play()")
                 action = ('P', x, y)
         return action
     
@@ -77,7 +89,7 @@ class MyAgent(Agent):
                 return True
             #We consider a lower depth (2) if the time_left is lower than 2 minutes
             #Or if we are at the very begining of the game.
-            if step < 7 or time_left < 120:
+            if step < 7 or time_left < 100:
                 return depth >= 2
             return depth > d
         
@@ -88,19 +100,25 @@ class MyAgent(Agent):
 
         def estimate_score(game:Board , state: Board, player):
             opponent = (player + 1) % 2
-            my_score = state.get_score(player) #difference between lengths of my shortest path and of my opponent
-            print('score BEFORE WALLSSSSSS: ', my_score)
+            try:
+                 my_score = 10*state.get_score(player) #difference between lengths of my shortest path and of my opponent
+            except NoPath:
+                print("NO PATH estimate_score")
+           
+            #print('score BEFORE WALLSSSSSS: ', my_score)
             #Consider the remaining walls of each player.
             #It helps the AI not to waste all its walls and try to save them.
-            my_score += ((game.nb_walls[player]) - (game.nb_walls[opponent])) 
+            my_score += 3*((game.nb_walls[player]) - (game.nb_walls[opponent])) 
+            
             #If no walls left and player lost
-            # if game.nb_walls[player] == 0 and my_score < 0:
-            #     my_score -= 1
-            # if game.nb_walls[(player+1)%2] == 0 and my_score > 0:
-            #     my_score += 1
+            if game.nb_walls[player] == 0 and my_score < 0:
+                my_score -= 100
+            if game.nb_walls[opponent] == 0 and my_score > 0:
+                my_score += 100
+
             if state.pawns[player][0] == state.goals[player]: my_score += 1000
             elif state.pawns[opponent][0] == state.goals[opponent]: my_score -= 1000
-            print('score: ', my_score)
+            #print('score: ', my_score)
             return my_score
     
         return estimate_score
@@ -121,7 +139,7 @@ class MyAgent(Agent):
             #print("END", len(best_wall_moves))
             return best_wall_moves
 
-        def filter_actions(state: Board, player):
+        def filter_actions(game, state: Board, player):
             #all_actions = state.get_actions(player)
             actions_to_explore = []
             all_pawn_moves = state.get_legal_pawn_moves(player)
@@ -138,6 +156,15 @@ class MyAgent(Agent):
                 #actions_to_explore.extend(filter_wall_moves(all_wall_moves, #state, other_player))
             #else:
             actions_to_explore.extend(filter_wall_moves(all_wall_moves, state, other_player))
+            # if len(all_pawn_moves) <= 4:
+            #     states = game.get_shortest_path(player)
+            #     for pawn_move in all_pawn_moves:
+            #         _, x, y = pawn_move
+            #         if (x,y) in states:
+            #             #print("true")
+            #             actions_to_explore.append(pawn_move)
+
+            # else:
             actions_to_explore.extend(all_pawn_moves)
             
             #print("player", player)
@@ -161,7 +188,7 @@ class MyAgent(Agent):
 
             v_star = -math.inf
             m_star = None
-            for action in actions(state, player):
+            for action in actions(game, state, player):
                 clone = state.clone()
                 clone.play_action(action, player)
                 next_state = clone
@@ -183,7 +210,7 @@ class MyAgent(Agent):
 
             v_star = math.inf
             m_star = None
-            for action in actions(state, player):
+            for action in actions(game, state, player):
                 clone = state.clone()
                 clone.play_action(action, player)
                 next_state = clone
