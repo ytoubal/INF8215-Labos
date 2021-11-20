@@ -87,14 +87,21 @@ class MyAgent(Agent):
         #TODO ameliorer
 
         def estimate_score(game:Board , state: Board, player):
-            #Here we can see why we put "sp" in the state (which contains the two shortest path)
-            #It allows us to not call board.get_shortest_path(P) in the evaluation function.
-            #And it's better because we need the same paths sooner in the code (see successor)
-            # minSteps = len(state.get_shortest_path(player))
-            # minStepsOpponent = len(state.get_shortest_path((player+1)%2))
-            # diffMinSteps =  minStepsOpponent - minSteps
-            # maxPath = 30
-            return state.get_score(player)
+            opponent = (player + 1) % 2
+            my_score = state.get_score(player) #difference between lengths of my shortest path and of my opponent
+            print('score BEFORE WALLSSSSSS: ', my_score)
+            #Consider the remaining walls of each player.
+            #It helps the AI not to waste all its walls and try to save them.
+            my_score += ((game.nb_walls[player]) - (game.nb_walls[opponent])) 
+            #If no walls left and player lost
+            # if game.nb_walls[player] == 0 and my_score < 0:
+            #     my_score -= 1
+            # if game.nb_walls[(player+1)%2] == 0 and my_score > 0:
+            #     my_score += 1
+            if state.pawns[player][0] == state.goals[player]: my_score += 1000
+            elif state.pawns[opponent][0] == state.goals[opponent]: my_score -= 1000
+            print('score: ', my_score)
+            return my_score
     
         return estimate_score
 
