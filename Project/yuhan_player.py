@@ -101,14 +101,13 @@ class MyAgent(Agent):
         def estimate_score(game:Board , state: Board, player):
             opponent = (player + 1) % 2
             try:
-                 my_score = 10*state.get_score(player) #difference between lengths of my shortest path and of my opponent
+                 my_score = 50*state.get_score(player) #difference between lengths of my shortest path and of my opponent
             except NoPath:
                 print("NO PATH estimate_score")
            
-            #print('score BEFORE WALLSSSSSS: ', my_score)
-            #Consider the remaining walls of each player.
-            #It helps the AI not to waste all its walls and try to save them.
-            my_score += 3*((game.nb_walls[player]) - (game.nb_walls[opponent])) 
+            #Consider the remaining walls
+            wall_comparison = (game.nb_walls[player]) - (game.nb_walls[opponent])
+            my_score += pow(wall_comparison, 2) 
             
             #If no walls left and player lost
             if game.nb_walls[player] == 0 and my_score < 0:
@@ -125,17 +124,19 @@ class MyAgent(Agent):
 
     def get_actions():
 
-        def filter_wall_moves(wall_moves, state: Board, other_player):
+        def filter_wall_moves(wall_moves, game, state: Board, other_player, threshold=3):
             best_wall_moves = []
             #best_wall_moves = wall_moves
             position_opponent = state.pawns[other_player]
             #print("START", len(wall_moves))
+            states = game.get_shortest_path(other_player)
             for wall_move in wall_moves:
                 (_, x, y) = wall_move
                 #walls close to opponent
                 position_from_opponent = utils.manhattan([x,y], position_opponent)
-                if position_from_opponent <= 3:
+                if position_from_opponent <= threshold and (x,y) in states:
                     best_wall_moves.append(wall_move)
+            
             #print("END", len(best_wall_moves))
             return best_wall_moves
 
@@ -155,7 +156,14 @@ class MyAgent(Agent):
             #elif player_steps_victory > adv_steps_victory:
                 #actions_to_explore.extend(filter_wall_moves(all_wall_moves, #state, other_player))
             #else:
-            actions_to_explore.extend(filter_wall_moves(all_wall_moves, state, other_player))
+            if state.nb_walls[player] <= 7:
+                print(len(all_wall_moves))
+                actions_to_explore.extend(filter_wall_moves(all_wall_moves, game, state, other_player, 6))
+
+                #actions_to_explore.extend(shortest_wall_moves)
+                # actions_to_explore.extend(all_wall_moves)
+            else:
+                actions_to_explore.extend(filter_wall_moves(all_wall_moves, game, state, other_player))
             # if len(all_pawn_moves) <= 4:
             #     states = game.get_shortest_path(player)
             #     for pawn_move in all_pawn_moves:
