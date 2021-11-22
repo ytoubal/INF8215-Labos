@@ -148,7 +148,7 @@ class MyAgent(Agent):
         start = time.time()
 
         def max_value(state: Board, alpha, beta, depth):
-            if cutoff(game, state, step, depth, start, time_left):
+            if cutoff(step, depth, start, time_left):
                 return heuristic(game,state, player), None
 
             if state.is_finished():
@@ -169,7 +169,7 @@ class MyAgent(Agent):
             return v_star,m_star
 
         def min_value(state: Board, alpha, beta, depth):
-            if cutoff(game, state, step, depth, start, time_left):
+            if cutoff(step, depth, start, time_left):
                 return heuristic(game,state, player), None
 
             if state.is_finished():

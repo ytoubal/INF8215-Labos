@@ -124,6 +124,9 @@ class MyAgent(Agent):
 
     def get_actions():
 
+        def coord_in_states(x, y, states):
+            return (x,y) in states or (x+1,y) in states or (x,y+1) in states or (x+1,y+1) in states or (x-1,y) in states or (x,y-1) in states or (x-1,y-1) in states or (x-1,y+1) in states or (x+1,y-1) in states 
+
         def filter_wall_moves(wall_moves, game, state: Board, other_player, threshold=3):
             best_wall_moves = []
             #best_wall_moves = wall_moves
@@ -134,7 +137,7 @@ class MyAgent(Agent):
                 (_, x, y) = wall_move
                 #walls close to opponent
                 position_from_opponent = utils.manhattan([x,y], position_opponent)
-                if position_from_opponent <= threshold and (x,y) in states:
+                if position_from_opponent <= threshold or coord_in_states(x,y, states):
                     best_wall_moves.append(wall_move)
             
             #print("END", len(best_wall_moves))
