@@ -44,33 +44,27 @@ class MyAgent(Agent):
           eg: ('WH', 5, 2) to put a horizontal wall on corridor (5,2)
           for more details, see `Board.get_actions()` in quoridor.py
         """
-        #print("percept:", percepts)
-        #print("player:", player)
-        #print("step:", step)
-        #print("time left:", time_left if time_left else '+inf')
 
-        # TODO: implement your agent and return an action for the current step.
-        
         board = dict_to_board(percepts)
-        #hardcode start
+        # Hardcoded start
         if step < 7 and board.nb_walls[0]+board.nb_walls[1] == 20 :
             try:
                 (x, y) = board.get_shortest_path(player)[0]
             except NoPath:
                 print("NO PATH 1 play()")
             return ('P', x, y)
+        # Continue hardcoded start even if a wall is placed
         elif step < 5 and board.nb_walls[0]+board.nb_walls[1] < 20:
             try:
                 (x, y) = board.get_shortest_path(player)[0]
             except NoPath:
                 print("NO PATH 1 play()")
             return ('P', x, y)
-        #alpha beta
+        # Start Alpha-Beta pruning
         else :
             if time_left >= 45 and board.nb_walls[player] > 0:
-                value, action = self.h_alphabeta_search(board, player, step,time_left)
-                print(value, action)
-            else:
+                _, action = self.h_alphabeta_search(board, player, step,time_left)
+            else: # No more walls or time is running out
                 try:
                     (x, y) = board.get_shortest_path(player)[0]
                 except NoPath:
@@ -78,17 +72,14 @@ class MyAgent(Agent):
                 action = ('P', x, y)
         return action
     
+    # Cut the search to a depth 'd'
     def cutoff_depth(d):
-        """A cutoff function that searches to depth d."""
-        #TODO ameliorer
-        def cutoff(game, state, step, depth, start_time, time_left):
+        def cutoff(step, depth, start_time, time_left):
             current_time = time.time()
-            #20 seconds to search
+            # 5 seconds left to search
             if current_time - start_time >= 5:
-                #print("time limit > 5s: ", current_time - start_time)
                 return True
-            #We consider a lower depth (2) if the time_left is lower than 2 minutes
-            #Or if we are at the very begining of the game.
+            # Reduce depth at the start or end of the game
             if step < 7 or time_left < 100:
                 return depth >= 2
             return depth > d
@@ -96,102 +87,79 @@ class MyAgent(Agent):
         return cutoff
 
     def heuristic():
-        #TODO ameliorer
-
         def estimate_score(game:Board , state: Board, player):
             opponent = (player + 1) % 2
             try:
-                 my_score = 50*state.get_score(player) #difference between lengths of my shortest path and of my opponent
+                # Difference between lengths of my shortest path and of my opponent                
+                 my_score = 50*state.get_score(player)
             except NoPath:
                 print("NO PATH estimate_score")
            
-            #Consider the remaining walls
+            # Consider the remaining walls of each player
             wall_comparison = (game.nb_walls[player]) - (game.nb_walls[opponent])
             my_score += pow(wall_comparison, 2) 
             
-            #If no walls left and player lost
+            # If no walls left and player lost
             if game.nb_walls[player] == 0 and my_score < 0:
                 my_score -= 100
             if game.nb_walls[opponent] == 0 and my_score > 0:
                 my_score += 100
-
+                
+            # Consider if our agents wins or loses
             if state.pawns[player][0] == state.goals[player]: my_score += 1000
             elif state.pawns[opponent][0] == state.goals[opponent]: my_score -= 1000
-            #print('score: ', my_score)
             return my_score
     
         return estimate_score
 
+    # Get filtered actions for the search in the Alpha-Beta pruning algorithm
     def get_actions():
-
-        def coord_in_states(x, y, states):
-            return (x,y) in states or (x+1,y) in states or (x,y+1) in states or (x+1,y+1) in states or (x-1,y) in states or (x,y-1) in states or (x-1,y-1) in states or (x-1,y+1) in states or (x+1,y-1) in states 
+        
+        # Verify if coordinates are in the shortest paths
+        def coord_in_path(x, y, shortest_path):
+            return (x,y) in shortest_path or (x+1,y) in shortest_path \
+                or (x,y+1) in shortest_path or (x+1,y+1) in shortest_path \
+                or (x-1,y) in shortest_path or (x,y-1) in shortest_path \
+                or (x-1,y-1) in shortest_path or (x-1,y+1) in shortest_path or (x+1,y-1) in shortest_path 
 
         def filter_wall_moves(wall_moves, game, state: Board, other_player, threshold=3):
             best_wall_moves = []
-            #best_wall_moves = wall_moves
             position_opponent = state.pawns[other_player]
-            #print("START", len(wall_moves))
-            states = game.get_shortest_path(other_player)
+            shortest_path = game.get_shortest_path(other_player)
             for wall_move in wall_moves:
                 (_, x, y) = wall_move
-                #walls close to opponent
                 position_from_opponent = utils.manhattan([x,y], position_opponent)
-                if position_from_opponent <= threshold or coord_in_states(x,y, states):
+                
+                # Add walls close to the opponent or to the shortest path
+                if position_from_opponent <= threshold or coord_in_path(x,y, shortest_path):
                     best_wall_moves.append(wall_move)
-            
-            #print("END", len(best_wall_moves))
             return best_wall_moves
 
         def filter_actions(game, state: Board, player):
-            #all_actions = state.get_actions(player)
             actions_to_explore = []
             all_pawn_moves = state.get_legal_pawn_moves(player)
             all_wall_moves = state.get_legal_wall_moves(player)
+            opponent = (player + 1) % 2
 
-            other_player = (player + 1) % 2
-
-            #player_steps_victory = state.min_steps_before_victory(player)
-            #adv_steps_victory = state.min_steps_before_victory(other_player)
-
-            #if player_steps_victory < adv_steps_victory:
-                #actions_to_explore.extend(all_pawn_moves)       
-            #elif player_steps_victory > adv_steps_victory:
-                #actions_to_explore.extend(filter_wall_moves(all_wall_moves, #state, other_player))
-            #else:
+            # Add filtered walls to consider for the actions
             if state.nb_walls[player] <= 7:
-                print(len(all_wall_moves))
-                actions_to_explore.extend(filter_wall_moves(all_wall_moves, game, state, other_player, 6))
-
-                #actions_to_explore.extend(shortest_wall_moves)
-                # actions_to_explore.extend(all_wall_moves)
+                actions_to_explore.extend(filter_wall_moves(all_wall_moves, game, state, opponent, 4))
             else:
-                actions_to_explore.extend(filter_wall_moves(all_wall_moves, game, state, other_player))
-            # if len(all_pawn_moves) <= 4:
-            #     states = game.get_shortest_path(player)
-            #     for pawn_move in all_pawn_moves:
-            #         _, x, y = pawn_move
-            #         if (x,y) in states:
-            #             #print("true")
-            #             actions_to_explore.append(pawn_move)
+                actions_to_explore.extend(filter_wall_moves(all_wall_moves, game, state, opponent))
 
-            # else:
             actions_to_explore.extend(all_pawn_moves)
-            
-            #print("player", player)
-            #print("PAWN", player_steps_victory)
-            #print("WALL", adv_steps_victory)
-            #print("STATE PLAYER")
-            #print(state, player)
             return actions_to_explore 
 
         return filter_actions
 
+    # Alpha-beta pruning algorithm
+    # Inspired from pseudocode in class material (Module 2: Recherche adversarielle)
     def h_alphabeta_search(self, game: Board, player, step, time_left, cutoff=cutoff_depth(25), heuristic=heuristic(), actions = get_actions()):
         start = time.time()
-
+        
         def max_value(state: Board, alpha, beta, depth):
-            if cutoff(game, state, step, depth, start, time_left):
+            # Determine when to stop the search and use our heuristic
+            if cutoff(step, depth, start, time_left):
                 return heuristic(game,state, player), None
 
             if state.is_finished():
@@ -212,8 +180,8 @@ class MyAgent(Agent):
             return v_star,m_star
 
         def min_value(state: Board, alpha, beta, depth):
-            # TODO: include a recursive call to max_value function
-            if cutoff(game, state, step, depth, start, time_left):
+            # Determine when to stop the search and use our heuristic
+            if cutoff(step, depth, start, time_left):
                 return heuristic(game,state, player), None
 
             if state.is_finished():
