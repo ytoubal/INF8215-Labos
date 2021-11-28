@@ -19,9 +19,10 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 import math
 import time
-import utils
 from quoridor import *
 
+def manhattan(pos1, pos2):
+    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
 class MyAgent(Agent):
 
@@ -123,7 +124,7 @@ class MyAgent(Agent):
             for wall_move in wall_moves:
                 (_, x, y) = wall_move
                 # Walls close to opponent
-                position_from_opponent = utils.manhattan([x,y], position_opponent)
+                position_from_opponent = manhattan([x,y], position_opponent)
                 if position_from_opponent <= 3:
                     best_wall_moves.append(wall_move)
             return best_wall_moves

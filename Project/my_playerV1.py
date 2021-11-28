@@ -22,16 +22,15 @@ import time
 from quoridor import *
 
 def cutoff_depth(d):
-    """A cutoff function that searches to depth d."""
-    #TODO ameliorer
-    def cutoff(game, state, depth, start_time, time_left):
+    # Searches to depth d
+    # TODO ameliorer
+    def cutoff(depth, start_time, time_left):
         current_time = time.time()
-        #20 seconds to search
+        # 5 seconds to search
         if current_time - start_time >= 5:
             print("time limit > 5s: ", current_time - start_time)
             return True
-        #We consider a lower depth (2) if the time_left is lower than 2 minutes
-        #Or if we are at the very begining of the game.
+        # Consider a lower depth if time_left is lower than 2 minutes
         if time_left < 120:
             return depth >= 2 
         return depth > d
@@ -42,13 +41,6 @@ def heuristic():
     #TODO ameliorer
 
     def estimate_score(game:Board , state: Board, player):
-        #Here we can see why we put "sp" in the state (which contains the two shortest path)
-        #It allows us to not call board.get_shortest_path(P) in the evaluation function.
-        #And it's better because we need the same paths sooner in the code (see successor)
-        # minSteps = len(state.get_shortest_path(player))
-        # minStepsOpponent = len(state.get_shortest_path((player+1)%2))
-        # diffMinSteps =  minStepsOpponent - minSteps
-        # maxPath = 30
         return state.get_score(player)
     
     return estimate_score
@@ -78,7 +70,6 @@ def h_alphabeta_search(game: Board, player, time_left, cutoff=cutoff_depth(50), 
             return v_star,m_star
 
         def min_value(state: Board, alpha, beta, depth):
-            # TODO: include a recursive call to max_value function
             if cutoff(game, state, depth, start, time_left):
                 return heuristic(game,state, player), None
 
@@ -122,10 +113,10 @@ class MyAgent(Agent):
           eg: ('WH', 5, 2) to put a horizontal wall on corridor (5,2)
           for more details, see `Board.get_actions()` in quoridor.py
         """
-        print("percept:", percepts)
+        #print("percept:", percepts)
         #print("player:", player)
         #print("step:", step)
-        print("time left:", time_left if time_left else '+inf')
+        #print("time left:", time_left if time_left else '+inf')
 
         # TODO: implement your agent and return an action for the current step.
         
