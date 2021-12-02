@@ -19,10 +19,11 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 import math
 import time
-import utils
 from quoridor import *
 import random
 
+def manhattan(pos1, pos2):
+    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
 class MyAgent(Agent):
 
@@ -34,14 +35,6 @@ class MyAgent(Agent):
 
     def calculate_hash(self, board):
         hash = 0
-        #print(self.state_table_pawn)
-        #print(self.state_table_horizontal_wall)
-        #print(self.state_table_vertical_wall)
-        #print(board.pawns)
-        #print(board.horiz_walls)
-        #print(board.verti_walls)
-        #print(self.print_board(board))
-        #print(len(self.print_board(board).split("\n")))
         for (x,y) in board.pawns:
             hash ^= self.state_table_pawn[x][y]
 
@@ -51,48 +44,7 @@ class MyAgent(Agent):
         for (x,y) in board.verti_walls:
             hash ^= self.state_table_vertical_wall[x][y]
 
-        # for i, line in enumerate(self.print_board(board).split("\n")):
-        #     for j, tile in enumerate(line.split(" ")):
-        #         print(tile)
-        #         if tile == "O":
-        #             continue
-        #         elif tile in [0,1]:
-        #             hash ^= self.state_table_pawn[i][j]
-        #print(hash)
-
         return hash
-
-    def print_board(self, board):
-        board_str = ""
-        for i in range(board.size):  
-            for j in range(board.size):
-                if board.pawns[0][0] == i and board.pawns[0][1] == j:
-                    board_str += "1"
-                elif board.pawns[1][0] == i and board.pawns[1][1] == j:
-                    board_str += "2"
-                else:
-                    board_str += "O"
-                if (i, j) in board.verti_walls:
-                    board_str += "|"
-                elif (i - 1, j) in board.verti_walls:
-                    board_str += "|"
-                else:
-                    board_str += " "
-            # board_str += "\n"
-            # for j in range(self.size):
-            #     if (i, j) in self.horiz_walls:
-            #         board_str += "---"
-            #     elif (i, j - 1) in self.horiz_walls:
-            #         board_str += "-- "
-            #     elif (i, j) in self.verti_walls:
-            #         board_str += "  |"
-            #     elif (i, j - 1) in self.horiz_walls and \
-            #         (i, j) in self.verti_walls:
-            #         board_str += "--|"
-            #     else:
-            #         board_str += "   "
-            board_str += "\n"
-        return board_str
 
     """My Quoridor agent."""
 
@@ -113,12 +65,6 @@ class MyAgent(Agent):
           eg: ('WH', 5, 2) to put a horizontal wall on corridor (5,2)
           for more details, see `Board.get_actions()` in quoridor.py
         """
-        #print("percept:", percepts)
-        #print("player:", player)
-        #print("step:", step)
-        #print("time left:", time_left if time_left else '+inf')
-
-        # TODO: implement your agent and return an action for the current step.
         
         board = dict_to_board(percepts)
         #hardcode start
@@ -152,12 +98,12 @@ class MyAgent(Agent):
         #TODO ameliorer
         def cutoff(game, state, step, depth, start_time, time_left):
             current_time = time.time()
-            #20 seconds to search
+            # 5 seconds to search
             if current_time - start_time >= 5:
                 #print("time limit > 5s: ", current_time - start_time)
                 return True
-            #We consider a lower depth (2) if the time_left is lower than 2 minutes
-            #Or if we are at the very begining of the game.
+            
+            #Consider a lower depth if time_left is lower than 100secs or if at start of game
             if step < 7 or time_left < 100:
                 return depth >= 2
             return depth > d
@@ -174,9 +120,6 @@ class MyAgent(Agent):
             except NoPath:
                 print("NO PATH estimate_score")
            
-            #print('score BEFORE WALLSSSSSS: ', my_score)
-            #Consider the remaining walls of each player.
-            #It helps the AI not to waste all its walls and try to save them.
             my_score += 3*((game.nb_walls[player]) - (game.nb_walls[opponent])) 
             
             #If no walls left and player lost
@@ -187,7 +130,7 @@ class MyAgent(Agent):
 
             if state.pawns[player][0] == state.goals[player]: my_score += 1000
             elif state.pawns[opponent][0] == state.goals[opponent]: my_score -= 1000
-            #print('score: ', my_score)
+
             return my_score
     
         return estimate_score
@@ -196,57 +139,32 @@ class MyAgent(Agent):
 
         def filter_wall_moves(wall_moves, game, state: Board, other_player, threshold=3):
             best_wall_moves = []
-            #best_wall_moves = wall_moves
             position_opponent = state.pawns[other_player]
-            #print("START", len(wall_moves))
             states = game.get_shortest_path(other_player)
+            
             for wall_move in wall_moves:
                 (_, x, y) = wall_move
                 #walls close to opponent
-                position_from_opponent = utils.manhattan([x,y], position_opponent)
+                position_from_opponent = manhattan([x,y], position_opponent)
                 if position_from_opponent <= threshold and (x,y) in states:
                     best_wall_moves.append(wall_move)
             
-            #print("END", len(best_wall_moves))
             return best_wall_moves
 
         def filter_actions(game, state: Board, player):
-            #all_actions = state.get_actions(player)
             actions_to_explore = []
             all_pawn_moves = state.get_legal_pawn_moves(player)
             all_wall_moves = state.get_legal_wall_moves(player)
 
             other_player = (player + 1) % 2
 
-            #player_steps_victory = state.min_steps_before_victory(player)
-            #adv_steps_victory = state.min_steps_before_victory(other_player)
-
-            #if player_steps_victory < adv_steps_victory:
-                #actions_to_explore.extend(all_pawn_moves)       
-            #elif player_steps_victory > adv_steps_victory:
-                #actions_to_explore.extend(filter_wall_moves(all_wall_moves, #state, other_player))
-            #else:
             if state.nb_walls[player] < 7:
-                #print(len(all_wall_moves))
                 actions_to_explore.extend(filter_wall_moves(all_wall_moves, game, state, other_player, 6))
             else:
                 actions_to_explore.extend(filter_wall_moves(all_wall_moves, game, state, other_player))
-            # if len(all_pawn_moves) <= 4:
-            #     states = game.get_shortest_path(player)
-            #     for pawn_move in all_pawn_moves:
-            #         _, x, y = pawn_move
-            #         if (x,y) in states:
-            #             #print("true")
-            #             actions_to_explore.append(pawn_move)
 
-            # else:
             actions_to_explore.extend(all_pawn_moves)
             
-            #print("player", player)
-            #print("PAWN", player_steps_victory)
-            #print("WALL", adv_steps_victory)
-            #print("STATE PLAYER")
-            #print(state, player)
             return actions_to_explore 
 
         return filter_actions
