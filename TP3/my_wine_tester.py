@@ -34,7 +34,7 @@ class MyWineTester(WineTester):
         
         for attributes in X_train:
             if len(attributes) < 13: print("Il en manque")
-        RF_clf = RandomForestClassifier(random_state=seed)
+        #RF_clf = RandomForestClassifier(random_state=seed)
         raise NotImplementedError()
 
     def predict(self, X_data):
