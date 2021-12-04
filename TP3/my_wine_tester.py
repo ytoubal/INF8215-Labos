@@ -21,7 +21,7 @@ from sklearn.model_selection import train_test_split
 class MyWineTester(WineTester):
     def __init__(self):
         # TODO: initialiser votre modèle ici:
-        self.seed = 8 # set seed for reproducibility
+        self.seed = 10
         self.classifier = RandomForestClassifier(random_state=self.seed)
 
         

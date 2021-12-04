@@ -79,7 +79,7 @@ def main():
     print("-" * 50)
     print(f"saving them to {params.prediction_file}...")
     print("-" * 50)
-    with open(params.prediction_file, "w") as f:
+    with open(params.prediction_file, "w", newline='') as f:
         csv_writer = csv.writer(f, delimiter=',')
         csv_writer.writerow(["id", "quality"])
         for line in y_pred_test:
