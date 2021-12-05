@@ -15,14 +15,14 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 
 
 class MyWineTester(WineTester):
     def __init__(self):
         # TODO: initialiser votre modèle ici:
-        self.seed = 10
-        self.classifier = RandomForestClassifier(max_depth=32, n_estimators=200, random_state=self.seed)
+        self.seed = 10 #10
+        self.classifier = RandomForestClassifier(n_estimators=193, random_state=self.seed)
 
         
     def train(self, X_train, y_train):
@@ -64,24 +64,28 @@ class MyWineTester(WineTester):
         # Split data into training and test datasets
         y = data_frame['13']    
         X = data_frame.drop('13', axis=1)  # rest are features
-        print(y.shape, X.shape)
+        #print(y.shape, X.shape)
    
         
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.11,random_state=self.seed)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.12,random_state=self.seed)
         
         # from sklearn.model_selection import GridSearchCV
         # parameters = {
-        #     "n_estimators":[5,10,50,100,200],
-        #     "max_depth":[2,4,8,16,32,None] 
+        #     "n_estimators":[i for i in range(180, 221)]
         # }
         # cv = GridSearchCV(self.classifier,parameters,cv=5)
         # cv.fit(X_train, y_train)
         # print(cv.best_params_)
+        
+        # Compute k-fold cross validation on training dataset and see mean accuracy score
+        # cv_scores = cross_val_score(self.classifier,X_train, y_train, cv=10, scoring='accuracy')
+        # print(cv_scores)
+        
         #Perform predictions
         self.classifier.fit(X_train, y_train)
         prediction = self.classifier.predict(X_test)
-        print(y_test)
-        print(X_test)
+        # print(y_test)
+        # print(X_test)
         print(classification_report(y_test, prediction))
 
         # Get numerical feature importances
