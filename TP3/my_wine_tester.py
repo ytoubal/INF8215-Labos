@@ -22,7 +22,7 @@ class MyWineTester(WineTester):
     def __init__(self):
         # TODO: initialiser votre modèle ici:
         self.seed = 10 #10
-        self.classifier = RandomForestClassifier(n_estimators=193, random_state=self.seed)
+        self.classifier = RandomForestClassifier(n_estimators=1000, oob_score= True, random_state=self.seed)
 
         
     def train(self, X_train, y_train):
@@ -63,11 +63,11 @@ class MyWineTester(WineTester):
 
         # Split data into training and test datasets
         y = data_frame['13']    
-        X = data_frame.drop('13', axis=1)  # rest are features
+        X = data_frame.drop(['13'], axis=1)  # rest are features
         #print(y.shape, X.shape)
    
         
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.12,random_state=self.seed)
+        X_train, y_train = X,y
         
         # from sklearn.model_selection import GridSearchCV
         # parameters = {
@@ -78,15 +78,16 @@ class MyWineTester(WineTester):
         # print(cv.best_params_)
         
         # Compute k-fold cross validation on training dataset and see mean accuracy score
-        # cv_scores = cross_val_score(self.classifier,X_train, y_train, cv=10, scoring='accuracy')
-        # print(cv_scores)
+        cv_scores = cross_val_score(self.classifier,X_train, y_train, cv=10, scoring='accuracy')
+        print(cv_scores)
         
         #Perform predictions
         self.classifier.fit(X_train, y_train)
-        prediction = self.classifier.predict(X_test)
+        print(self.classifier.oob_score_)
+        #prediction = self.classifier.predict(X_test)
         # print(y_test)
         # print(X_test)
-        print(classification_report(y_test, prediction))
+        #print(classification_report(y_test, prediction))
 
         # Get numerical feature importances
         # importances = list(self.classifier.feature_importances_)
@@ -115,6 +116,7 @@ class MyWineTester(WineTester):
         data_frame.columns = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
 
         data_frame['1'] = data_frame['1'].astype('category').cat.codes # convert wine color to number
+        #data_frame = data_frame.drop(['8'], axis=1)
         results = self.classifier.predict(data_frame)
         
         prediction = []
