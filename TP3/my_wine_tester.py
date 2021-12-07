@@ -22,7 +22,7 @@ class MyWineTester(WineTester):
     def __init__(self):
         # TODO: initialiser votre modèle ici:
         self.seed = 10 #10
-        self.classifier = RandomForestClassifier(n_estimators=1000, oob_score= True, random_state=self.seed)
+        self.classifier = RandomForestClassifier(n_estimators=1000, max_features=5, oob_score= True, random_state=self.seed)
 
         
     def train(self, X_train, y_train):
@@ -55,35 +55,37 @@ class MyWineTester(WineTester):
         data_frame['13'] = quality_frame['1'] # add quality to entire dataframe
         data_frame['1']=data_frame['1'].astype('category').cat.codes # convert wine color to number
 
-        print(data_frame)
+        # print(data_frame)
 
         # Correlation matrix
-        corr = data_frame.corr()
-        print(corr)
+        # corr = data_frame.corr()
+        # print(corr)
 
         # Split data into training and test datasets
         y = data_frame['13']    
         X = data_frame.drop(['13'], axis=1)  # rest are features
         #print(y.shape, X.shape)
-   
+        #print(y.value_counts())
         
         X_train, y_train = X,y
-        
+        #X_train, X_test, y_train, y_test = train_test_split(X,y, test_size=0.1, random_state=self.seed)
+
         # from sklearn.model_selection import GridSearchCV
         # parameters = {
-        #     "n_estimators":[i for i in range(180, 221)]
+        #     "max_depth":[i for i in range(5,11)]
         # }
         # cv = GridSearchCV(self.classifier,parameters,cv=5)
         # cv.fit(X_train, y_train)
         # print(cv.best_params_)
         
         # Compute k-fold cross validation on training dataset and see mean accuracy score
-        cv_scores = cross_val_score(self.classifier,X_train, y_train, cv=10, scoring='accuracy')
-        print(cv_scores)
+        # cv_scores = cross_val_score(self.classifier,X_train, y_train, cv=10, scoring='accuracy')
+        # print(cv_scores)
+        # print(sum(cv_scores)/len(cv_scores))
         
         #Perform predictions
         self.classifier.fit(X_train, y_train)
-        print(self.classifier.oob_score_)
+        # print(self.classifier.oob_score_)
         #prediction = self.classifier.predict(X_test)
         # print(y_test)
         # print(X_test)
