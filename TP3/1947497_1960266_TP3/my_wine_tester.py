@@ -30,12 +30,6 @@ class MyWineTester(WineTester):
                 the first column is the example ID.
                 the second column is the example label.
         """
-
-        # # Convert training data into float (for correlation matrix)
-        # for i, attributes in enumerate(X_train):
-        #     for j, attribute in enumerate(attributes):
-        #         if j==1 or j==0: continue
-        #         X_train[i][j] = float(attribute)
                 
         # Get dataframes
         data_frame = pd.DataFrame(X_train)
