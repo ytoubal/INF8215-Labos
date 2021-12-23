@@ -3,7 +3,7 @@ import csv
 
 
 from wine_testers import RandomWineTester
-from my_wine_tester import MyWineTester
+from my_wine_tester import MyWineTester, MyWineTesterNN
 
 
 def main():

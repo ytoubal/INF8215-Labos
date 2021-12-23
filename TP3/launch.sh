@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # TODO: change to your PATH
-source /home/yuhan/anaconda3/etc/profile.d/conda.sh
+source C:/Users/yanis/miniconda3/etc/profile.d/conda.sh
 
 # check if requirements.txt exists?
 exist=0
